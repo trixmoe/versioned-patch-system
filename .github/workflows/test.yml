@@ -32,6 +32,7 @@ jobs:
              git commit -m "this is very specific"
       - name: Specific commit 2
         run: |
+             cd beamer
              echo "empty" >> empty
              git add empty
              git commit -m "new empty file" 
