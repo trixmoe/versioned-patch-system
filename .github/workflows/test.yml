@@ -35,7 +35,7 @@ jobs:
              echo "empty" >> empty
              git add empty
              git commit -m "new empty file" 
-             git tag generic
+             git tag specific
       - name: Save patches
         run: |
              make save
