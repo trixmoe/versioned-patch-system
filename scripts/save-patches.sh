@@ -78,12 +78,12 @@ for module in $MODULES; do
     else
         before_commit=$upstream_commit
     fi
-    save_patches || continue
+    save_patches || exit 1
 
     [ -z "$one_tag" ] || continue
     vps_output_dir=$vps_root_dir/patches/$module_dir/$second_most_recent_tag
     mkdir -p "$vps_output_dir"
     including_commit=$before_commit
     before_commit=$upstream_commit
-    save_patches || continue
+    save_patches || exit 1
 done
