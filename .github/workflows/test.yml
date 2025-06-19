@@ -1,0 +1,42 @@
+name: Test
+on:
+  push:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: make update
+      - name: Generic commit
+        run: |
+             cd beamer
+             echo "test" >> p1500-serial-codes.md
+             git add p1500-serial-codes.md
+             git config user.name "test"
+             git config user.email "test@example.org"
+             git commit -m "test"
+             git tag generic
+      - name: Setup Git identity for specific commits
+        run: |
+             git config user.name "specific"
+             git config user.email "test@example.com"
+      - name: Specific commit 1
+        run: |
+             cd beamer
+             echo "specific" > README.md
+             git add README.md
+             git commit -m "this is very specific"
+      - name: Specific commit 2
+        run: |
+             echo "empty" >> empty
+             git add empty
+             git commit -m "new empty file" 
+             git tag generic
+      - name: Save patches
+        run: |
+             make save
+             ls -R patches
