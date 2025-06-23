@@ -39,7 +39,7 @@ will_tag=1
 vps_root_dir=$(rootdir)
 
 # shellcheck source=./modules
-. ./modules
+. $MODULES_FILE_ROOTDIR
 
 for module in $MODULES; do
     module_dir="" # SC2154/SC2034
