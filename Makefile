@@ -3,6 +3,9 @@ default: help
 update: ## Update modules
 	@./scripts/update.sh
 
+nupdate: ## Update modules (no backup)
+	@./scripts/update.sh -n
+
 dirclean: ## Delete module directories
 	@./scripts/cleandir.sh
 

@@ -14,11 +14,15 @@ print_help()
     printf "  --help   Show this help menu\n"
 }
 
+unset no_backup
 while :; do
     case $1 in
         -\?|-help|--help)
             print_help
             exit 0
+            ;;
+        -n)
+            no_backup=1
             ;;
         --)
             shift
@@ -52,19 +56,24 @@ update_module() {
         git rev-parse --is-inside-work-tree > /dev/null 2>&1 || { errormsg "module directory \"%s\" is not a git repository\n" "$directory"; exit 1; }
         infomsg "Module already cloned.\n"
 
-        # Backing up changes
-        current_branch=$(git rev-parse --abbrev-ref HEAD)
-        curr_date=$(date +%s)
-        backup_branch=vps-$current_branch-$curr_date
-        warnmsg "Any changes (uncommitted and committed) will be backed up into branch '%s'\n" "$backup_branch"
-        number_of_uncommitted_filed=$(git status --porcelain | wc -l)
+        if [ -z "$no_backup" ]; then
+            # Backing up changes
+            current_branch=$(git rev-parse --abbrev-ref HEAD)
+            curr_date=$(date +%s)
+            backup_branch=vps-$current_branch-$curr_date
+            warnmsg "Any changes (uncommitted and committed) will be backed up into branch '%s'\n" "$backup_branch"
+            number_of_uncommitted_filed=$(git status --porcelain | wc -l)
 
-        git checkout -qb "$backup_branch" || { errormsg "cannot backup current branch \"%s\", skipping.\n" "$current_branch"; return; }
-        if [ "$number_of_uncommitted_filed" -gt 0 ]; then
-            # Commit every uncommited thing
-            git add -A || { errormsg "cannot backup unsaved changes\n"; return; }
-            GIT_COMMITTER_NAME="$VPS_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$VPS_AUTHOR_EMAIL" git commit --author="$VPS_AUTHOR" -m "Backup of $current_branch at $curr_date - staged / unstaged / untracked files / (EXCL. ignored)" || { errormsg "cannot backup unsaved changes\n"; return; }
-            warnmsg "All uncommitted changes (excl. ignored) were saved on %s\n" "$backup_branch"
+            git checkout -qb "$backup_branch" || { errormsg "cannot backup current branch \"%s\", skipping.\n" "$current_branch"; return; }
+            if [ "$number_of_uncommitted_filed" -gt 0 ]; then
+                # Commit every uncommited thing
+                git add -A || { errormsg "cannot backup unsaved changes\n"; return; }
+                GIT_COMMITTER_NAME="$VPS_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$VPS_AUTHOR_EMAIL" git commit --author="$VPS_AUTHOR" -m "Backup of $current_branch at $curr_date - staged / unstaged / untracked files / (EXCL. ignored)" || { errormsg "cannot backup unsaved changes\n"; return; }
+                warnmsg "All uncommitted changes (excl. ignored) were saved on %s\n" "$backup_branch"
+            fi
+        else
+            warnmsg "Any changes (uncommitted and committed) will be LOST\n"
+            git reset -q --hard "origin/$branch"
         fi
 
         # Going back into root for the brach/commit checkout
