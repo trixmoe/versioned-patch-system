@@ -248,9 +248,55 @@ reset_workingdir() (
     expected_hash="";
     eval expected_hash="\$GITHUBIGNORE_COMMIT"
     [ "$current_hash" = "$expected_hash" ] || { errormsg "Resetting modules didn't work, hash is not as-expected, \"%s\" instead of \"%s\"\n" "$current_hash" "$expected_hash"; exit 1; }
+    # Check if backup branch was created
+    git branch --list | tr -d ' ' | grep "vps-backup-" >/dev/null 2>&1 || { errormsg "'make update' didn't create a backup branch.\n"; exit 1; }
 )
 
 runtest reset_workingdir
+
+# Test backup branch created with 'make update'
+test_backup_branch() (
+    set -e
+    cd github-ignore
+    # Make current state be the backup branch
+    backup_branch=$(git branch --list | tr -d ' ' | grep "vps-backup-")
+    [ -n "$backup_branch" ] || { errormsg "No backup branch found to test restore.\n"; exit 1; }
+    git reset --hard "$backup_branch"
+    # Check commit hash
+    current_hash=$(git rev-parse HEAD)
+    expected_hash="";
+    eval expected_hash="\$SPECIFIC_COMMIT_HASH"
+    [ "$current_hash" = "$expected_hash" ] || { errormsg "Restoring from backup didn't work, hash is not as-expected, \"%s\" instead of \"%s\"\n" "$current_hash" "$expected_hash"; exit 1; }
+)
+
+runtest test_backup_branch
+
+# Test 'make nupdate'
+reset_workingdir_without_backup() (
+    set -e
+    # Delete the backup branch first
+    cd github-ignore
+        if backup_branch=$(git branch --list | tr -d ' ' | grep "vps-backup-"); then
+            [ -n "$backup_branch" ] || { errormsg "No backup branch found to delete.\n"; exit 1; }
+            git branch -D "$backup_branch"
+        fi
+    cd ../
+    # Reset the working directory
+    make nupdate
+    cd github-ignore
+    # Check that it was reset as-expected
+    current_hash=$(git rev-parse HEAD)
+    expected_hash="";
+    eval expected_hash="\$GITHUBIGNORE_COMMIT"
+    [ "$current_hash" = "$expected_hash" ] || { errormsg "Resetting modules with no backup didn't work, hash is not as-expected, \"%s\" instead of \"%s\"\n" "$current_hash" "$expected_hash"; exit 1; }
+    # Check if backup branch was NOT created
+    if git branch --list | tr -d ' ' | grep "vps-backup-" >/dev/null 2>&1; then
+        errormsg "'make nupdate' created a backup branch, but it shouldn't.\n"
+        exit 1
+    fi
+)
+
+runtest reset_workingdir_without_backup
 
 # Apply the single generic commit
 apply_generic_commit() (
@@ -281,9 +327,9 @@ runtest apply_specific_commits
 delete_branches() (
     set -e
     cd github-ignore
-    git branch --list | tr -d ' ' | grep "vps-" | xargs git branch -D
+    git branch --list | tr -d ' ' | grep "vps-" | xargs -I {} git branch -D {}
     cd ../github-sheet
-    git branch --list | tr -d ' ' | grep "vps-" | xargs git branch -D
+    git branch --list | tr -d ' ' | grep "vps-" | xargs -I {} git branch -D {}
 )
 
 infomsg "${COLOR_PURPLE}Info: The working dir is reset for a proper specific commits application test with both patchsets$RT\n"

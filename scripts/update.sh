@@ -60,7 +60,7 @@ update_module() {
             # Backing up changes
             current_branch=$(git rev-parse --abbrev-ref HEAD)
             curr_date=$(date +%s)
-            backup_branch=vps-$current_branch-$curr_date
+            backup_branch=vps-backup-$current_branch-$curr_date
             warnmsg "Any changes (uncommitted and committed) will be backed up into branch '%s'\n" "$backup_branch"
             number_of_uncommitted_filed=$(git status --porcelain | wc -l)
 
