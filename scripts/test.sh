@@ -170,11 +170,29 @@ change_generic_commit() (
     ls patches/github-ignore/generic/0001-not.patch
     infomsg "The following files are present:\n"
     ls patches/github-ignore/generic/
-    files=$(find patches/github-ignore/generic/ -maxdepth 1 -type f  | wc -l)
+    files=$(find patches/github-ignore/generic/ -maxdepth 1 -type f -name "*.patch" | wc -l)
     [ "$files" -eq 1 ] || { errormsg "There is more than 1 patch file (%s), it does not delete old patches on save\n" "$files"; exit 1; }
 )
 
 runtest change_generic_commit
+
+test_non_patch_files() (
+    set -e
+
+    # Create a Markdown file in a patchset dir
+    not_a_patch=patches/github-ignore/generic/NOT_A_PATCH.md
+    echo "# My document" > "$not_a_patch"
+    echo "This is not a patch file" >> "$not_a_patch"
+    ls patches/github-ignore/generic/
+
+    make save-one
+
+    # Check if the file still exists
+    ls patches/github-ignore/generic/
+    [ -f "$not_a_patch" ] || { errormsg "Non-patch files are deleted on save, they should not be.\n"; exit 1; }
+)
+
+runtest test_non_patch_files
 
 # utility: get the top-most commit hash, useful to check if everything applies properly
 get_ghignore_commit_hash() (
@@ -215,14 +233,14 @@ specific_commits() (
     ret_code=0
     ls -R patches/github-ignore/generic/*
     ls -R patches/github-ignore/specific/*
-    files=$(find patches/github-ignore/specific/ -maxdepth 1 -type f  | wc -l)
+    files=$(find patches/github-ignore/specific/ -maxdepth 1 -type f -name "*.patch" | wc -l)
     [ "$files" -eq 2 ] || { errormsg "There are not 2 patch files (%s), make save is not working as expected.\n" "$files"; ret_code=1; }
 
     # Try to save-one (only specific)
     rm -r patches/github-ignore
     make save-one
     ls -R patches/github-ignore/specific/*
-    files=$(find patches/github-ignore/specific/ -maxdepth 1 -type f  | wc -l)
+    files=$(find patches/github-ignore/specific/ -maxdepth 1 -type f -name "*.patch" | wc -l)
     [ "$files" -eq 2 ] || { errormsg "There are not 2 patch files (%s), make save-one is not working as expected.\n" "$files"; ret_code=1; }
     ls -R patches/github-ignore/generic/* 2>/dev/null && { errormsg "\"make save-one\" saves more than 1 patchset."; ret_code=1 ; }
 
