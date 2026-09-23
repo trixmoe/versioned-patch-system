@@ -38,16 +38,14 @@ will_tag=1
 
 vps_root_dir=$(rootdir)
 
-. "$MODULES_FILE_ROOTDIR"
+for module_with_patches_path in "$vps_root_dir"/patches/*; do
+    module_dir=$(basename "$module_with_patches_path")
+    patches_dir="$module_with_patches_path"/"$patch_set"
 
-for module in $MODULES; do
-    module_dir="" # SC2154/SC2034
-    eval module_dir="\$${module}_DIRECTORY"
-    patches_dir=$vps_root_dir/patches/$module_dir/$patch_set
+    [ -d "$vps_root_dir/$module_dir" ] || { warnmsg "module \"%s\" is not cloned. Skipping.\n" "$module_dir"; continue; }
+    [ -d "$patches_dir" ] || { warnmsg "patches \"%s\" do not exist for module \"%s\"\n" "$patch_set" "$module_dir"; continue; }
 
-    ! [ -d "$patches_dir" ] && { warnmsg "patches \"%s\" do not exist for module \"%s\"\n" "$patch_set" "$module_dir"; continue; }
-
-    cd "$vps_root_dir/$module_dir" || { errormsg "cannot enter module \"%s\"\n" "$vps_root_dir/$module_dir"; exit 1; }
+    cd "$vps_root_dir/$module_dir" || { errormsg "cannot enter module \"%s\", even though it is cloned.\n" "$module_dir"; exit 1; }
 
     # check if part of repo -> then check if part of branch -> if both true, error out
     git rev-parse -q --verify --end-of-options "$patch_set" > /dev/null && git merge-base --is-ancestor "$patch_set" HEAD > /dev/null && { warnmsg "patch set \"%s\" was previously applied. Skipping.\n" "$patch_set"; exit 0; }
