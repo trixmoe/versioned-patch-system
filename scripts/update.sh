@@ -8,9 +8,10 @@ vps_root_dir=$(rootdir)
 
 print_help()
 {
-    printf "Usage: update.sh\n"
-    printf "This script downloads modules, as specified in the modules file.\n\n"
+    printf "Usage: update.sh [module ...]\n"
+    printf "This script downloads the specified modules, if no modules are\nspecified, it downloads the modules as specified in the 'modules' file.\n\n"
 
+    printf "  -n       Do not create backup branch\n"
     printf "  --help   Show this help menu\n"
 }
 
@@ -54,6 +55,7 @@ update_module() {
     if [ -d "$directory" ]; then
         cd "$directory" || { errormsg "cannot enter module directory \"%s\"\n" "$directory"; exit 1; }
         git rev-parse --is-inside-work-tree > /dev/null 2>&1 || { errormsg "module directory \"%s\" is not a git repository\n" "$directory"; exit 1; }
+        git remote -v | grep -qm1 "$url" || { errormsg "This module has a different Git remote, this may be a different module with the same directory name.\n"; exit 1; }
         infomsg "Module already cloned.\n"
 
         if [ -z "$no_backup" ]; then
@@ -98,6 +100,12 @@ update_module() {
     fi
 }
 
-for module in $MODULES; do
-    update_module "$module"
-done
+if [ $# -gt 0 ]; then
+    for module in "$@"; do
+        update_module "$module"
+    done
+else
+    for module in $MODULES; do
+        update_module "$module"
+    done
+fi

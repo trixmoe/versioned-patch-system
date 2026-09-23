@@ -9,3 +9,13 @@ BEAMER_URL="https://github.com/trixmoe/beamer-serial.git"
 BEAMER_BRANCH="main"
 BEAMER_COMMIT="388960fc6f768587b6caddc9e6dcf93b6d103789"
 BEAMER_DIRECTORY="beamer"
+
+WPULL_UPSTREAM_URL="https://github.com/ArchiveTeam/wpull.git"
+WPULL_UPSTREAM_BRANCH="develop"
+WPULL_UPSTREAM_COMMIT="cfa5bcc571e7ff2d5175d8299e90651955c72df5"
+WPULL_UPSTREAM_DIRECTORY="wpull"
+
+WPULL_MYFORK_URL="https://github.com/trixmoe/wpull.git"
+WPULL_MYFORK_BRANCH="ci"
+WPULL_MYFORK_COMMIT="82d8c4a8354c754f2a00e85f4644f0d18cb19b10"
+WPULL_MYFORK_DIRECTORY="wpull"
