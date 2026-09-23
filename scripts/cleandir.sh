@@ -35,7 +35,7 @@ while :; do
 done
 
 
-for module in $MODULES; do
+for module in $ALL_MODULES; do
     infomsg "Removing module: %s\n" "$module"
 
     # Get module information

@@ -1,4 +1,6 @@
 MODULES="DASHBOARD BEAMER"
+# Not all modules are activated/updated/cloned by default, but should be known, e.g. for cleaning
+ALL_MODULES="$MODULES WPULL_UPSTREAM WPULL_MYFORK"
 
 DASHBOARD_URL="https://github.com/trixmoe/cnc-dashboard.git"
 DASHBOARD_BRANCH="master"

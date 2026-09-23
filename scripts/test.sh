@@ -89,6 +89,7 @@ runtest() {
 export MODULES_FILE_ROOTDIR="$vps_root_dir/testmodules"
 cat << EOF > "$vps_root_dir/testmodules"
 MODULES="GITHUBIGNORE CHEATSHEET"
+ALL_MODULES="\$MODULES"
 
 GITHUBIGNORE_URL="https://github.com/github/gitignore.git"
 GITHUBIGNORE_BRANCH="main"
