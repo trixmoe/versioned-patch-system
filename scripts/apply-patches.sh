@@ -48,7 +48,7 @@ for module_with_patches_path in "$vps_root_dir"/patches/*; do
     cd "$vps_root_dir/$module_dir" || { errormsg "cannot enter module \"%s\", even though it is cloned.\n" "$module_dir"; exit 1; }
 
     # check if part of repo -> then check if part of branch -> if both true, error out
-    git rev-parse -q --verify --end-of-options "$patch_set" > /dev/null && git merge-base --is-ancestor "$patch_set" HEAD > /dev/null && { warnmsg "patch set \"%s\" was previously applied. Skipping.\n" "$patch_set"; exit 0; }
+    git rev-parse -q --verify --end-of-options "$patch_set" > /dev/null && git merge-base --is-ancestor "$patch_set" HEAD > /dev/null && { warnmsg "patch set \"%s\" was previously applied. Skipping.\n" "$patch_set"; continue; }
     # TODO: add Git notes to each commit based on patchset (e.g. vps-patchset)
 
     infomsg "Applying patch set \"%s\"\n" "$patch_set"
